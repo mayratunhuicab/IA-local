@@ -4,9 +4,9 @@ const API_URL = "http://localhost:8000";
 
 export const api = {
   // Autenticación
-  registrar: async (nombre, email, password) => {
+  register: async (nombre, email, password) => {
     const response = await fetch(
-      `${API_URL}/registrar?nombre=${nombre}&email=${email}&password=${password}`,
+      `${API_URL}/registrar?nombre=${encodeURIComponent(nombre)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
       { method: "POST" }
     );
     return response.json();
@@ -14,48 +14,50 @@ export const api = {
 
   login: async (email, password) => {
     const response = await fetch(
-      `${API_URL}/login?email=${email}&password=${password}`,
+      `${API_URL}/login?email=${encodeURIComponent(email)}&contraseña=${encodeURIComponent(password)}`,
       { method: "POST" }
     );
     return response.json();
   },
 
   // Chat
-  chat: async (email, mensaje, area) => {
+  sendMessage: async (email, area, mensaje) => {
     const response = await fetch(
-      `${API_URL}/chat?email=${email}&mensaje=${encodeURIComponent(mensaje)}&area=${area}`,
+      `${API_URL}/chat?email=${encodeURIComponent(email)}&mensaje=${encodeURIComponent(mensaje)}&area=${encodeURIComponent(area)}`,
       { method: "POST" }
     );
     return response.json();
   },
 
   // Tareas
-  crearTarea: async (email, titulo, descripcion, area, prioridad) => {
+  createTask: async (email, area, taskData) => {
+    const { titulo, descripcion, prioridad, fecha_vencimiento } = taskData;
     const response = await fetch(
-      `${API_URL}/crear-tarea?email=${email}&titulo=${encodeURIComponent(titulo)}&descripcion=${encodeURIComponent(descripcion)}&area=${area}&prioridad=${prioridad}`,
+      `${API_URL}/crear-tarea?email=${encodeURIComponent(email)}&titulo=${encodeURIComponent(titulo)}&descripcion=${encodeURIComponent(descripcion)}&area=${encodeURIComponent(area)}&prioridad=${encodeURIComponent(prioridad)}&fecha_vencimiento=${encodeURIComponent(fecha_vencimiento || '')}`,
       { method: "POST" }
     );
     return response.json();
   },
 
-  obtenerTareas: async (email, area = null) => {
+  getTasks: async (email, area = null) => {
     let url = `${API_URL}/tareas/${email}`;
     if (area) url += `?area=${area}`;
     const response = await fetch(url);
-    return response.json();
+    const data = await response.json();
+    return data.tareas || [];
   },
 
-  marcarCompletada: async (email, tareaId) => {
+  updateTask: async (email, tareaId) => {
     const response = await fetch(
-      `${API_URL}/tarea/${tareaId}/completar?email=${email}`,
+      `${API_URL}/tarea/${tareaId}/completar?email=${encodeURIComponent(email)}`,
       { method: "PUT" }
     );
     return response.json();
   },
 
-  eliminarTarea: async (email, tareaId) => {
+  deleteTask: async (email, tareaId) => {
     const response = await fetch(
-      `${API_URL}/tarea/${tareaId}?email=${email}`,
+      `${API_URL}/tarea/${tareaId}?email=${encodeURIComponent(email)}`,
       { method: "DELETE" }
     );
     return response.json();
